@@ -8,6 +8,7 @@ $(document).ready(function() {
       $('#party_two').val(),
       $('#document_url').val(),
       $('#days_timer').val(),
+      $('#valid_timer').val(),
       {from: web3.eth.accounts[0], data: bin, gas: gas},
       function (e, r) {
         if (e) {

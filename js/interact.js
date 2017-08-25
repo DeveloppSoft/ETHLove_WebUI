@@ -108,101 +108,109 @@ $(document).ready(function() {
                   if (e) throw e
                   refund_on = r
 
+                  love.valid_until(function (e, r) {
+                    if (e) throw e
+                    valid_until = r
+
                   love.required_signatures(function (e, r) {
                     if (e) throw e
                     required_signatures = r
 
-                    love.ACCEPT_BID(function (e, r) {
-                      if (e) throw e
-                      accept_bid = r
-
-                      love.DIVORCE_BID(function (e, r) {
+                      love.ACCEPT_BID(function (e, r) {
                         if (e) throw e
-                        divorce_bid = r
+                        accept_bid = r
 
-                        if (!initialized) {
-                          $('#status_state').text('Waiting for initialization')
-                        } else if (initialized && !married && !divorced) {
-                          $('#status_state').text('Waiting for confirmations, remaining: ' + String(required_signatures))
-                        } else if (married) {
-                          $('#status_state').text('Married')
-                        } else if (divorced) {
-                          $('#status_state').text('Divorced')
-                        } else {
-                          $('#status_state').text('Unknown')
-                        }
+                        love.DIVORCE_BID(function (e, r) {
+                          if (e) throw e
+                          divorce_bid = r
 
-                        // TODO colors if user accepted union
+                          if (!initialized) {
+                            $('#status_state').text('Waiting for initialization')
+                          } else if (initialized && !married && !divorced) {
+                            $('#status_state').text('Waiting for confirmations, remaining: ' + String(required_signatures))
+                          } else if (married) {
+                            $('#status_state').text('Married')
+                          } else if (divorced) {
+                            $('#status_state').text('Divorced')
+                          } else {
+                            $('#status_state').text('Unknown')
+                          }
 
-                        if (url_document.indexOf(':\/\/') == -1) {
-                          // No protocol included
-                          url_document = "https:\/\/" + url_document
-                        }
+                          // TODO colors if user accepted union
 
-                        $('#status_url').html('<a target="_blank" href="' + url_document + '">' + url_document + '</a>')
-                        $('#status_party_one').text(party_one)
-                        $('#status_party_two').text(party_two)
+                          if (url_document.indexOf(':\/\/') == -1) {
+                            // No protocol included
+                            url_document = "https:\/\/" + url_document
+                          }
 
-                        date = new Date(parseInt(refund_on) * 1000)
-                        $('#status_time_left').text(date.toString())
+                          $('#status_url').html('<a target="_blank" href="' + url_document + '">' + url_document + '</a>')
+                          $('#status_party_one').text(party_one)
+                          $('#status_party_two').text(party_two)
 
-                        // Now set which controls are available, let's do a new callbacks! ...
-                        love.is_witness(web3.eth.accounts[0], function (e, r) {
+                          date = new Date(parseInt(refund_on) * 1000)
+                          $('#status_time_left').text(date.toString())
+
+                          valid_date = new Date(parseInt(valid_until) * 1000)
+                          $('#valid_until').text(valid_date.toString())
+
+                          // Now set which controls are available, let's do a new callbacks! ...
+                          love.is_witness(web3.eth.accounts[0], function (e, r) {
                           if (e) throw e
                           userIsWitness = r
 
-                          if (!(party_one == web3.eth.accounts[0] || party_two == web3.eth.accounts[0]) || initialized) {
-                            $('#add_witness').hide()
-                            $('#end_initialization').hide()
-                          }
+                            if (!(party_one == web3.eth.accounts[0] || party_two == web3.eth.accounts[0]) || initialized) {
+                              $('#add_witness').hide()
+                              $('#end_initialization').hide()
+                            }
 
-                          // TODO do not show if already accepted
-                          if (!initialized || married || divorced || !(party_one == web3.eth.accounts[0] || party_two == web3.eth.accounts[0] || userIsWitness)) {
-                            $('#accept_union').hide()
-                          }
+                            // TODO do not show if already accepted
+                            if (!initialized || married || divorced || !(party_one == web3.eth.accounts[0] || party_two == web3.eth.accounts[0] || userIsWitness)) {
+                              $('#accept_union').hide()
+                            }
 
-                          today = new Date()
-                          if (!initialized || !(party_one == web3.eth.accounts[0] || party_two == web3.eth.accounts[0] || userIsWitness) || married || divorced || !(today.getTime() >= date.getTime())) {
-                            $('#refund').hide()
-                          }
+                            today = new Date()
+                            if (!initialized || !(party_one == web3.eth.accounts[0] || party_two == web3.eth.accounts[0] || userIsWitness) || married || divorced || !(today.getTime() >= date.getTime())) {
+                              $('#refund').hide()
+                            }
 
-                          if (!(party_one == web3.eth.accounts[0] || party_two == web3.eth.accounts[0]) || !married || divorced) {
-                            $('#divorce').hide()
-                          }
+                            if (!(party_one == web3.eth.accounts[0] || party_two == web3.eth.accounts[0]) || !married || divorced) {
+                              $('#divorce').hide()
+                            }
 
-                          // TODO events should update the UI
+                            // TODO events should update the UI
 
-                          // Time to fill more data: witnesses and events
-                          // 1) Witnesses
-                          //var witness_added = love.WitnessAdded()
-                          //witness_added.watch(function (e, r) {
-                          //  if (e) throw e
-                          //  $('#witness_list').append('<li class="collection-item">' + r["args"]["witness"] + '</li>')
-                          //})
+                            // Time to fill more data: witnesses and events
+                            // 1) Witnesses
+                            //var witness_added = love.WitnessAdded()
+                            //witness_added.watch(function (e, r) {
+                            //  if (e) throw e
+                            //  $('#witness_list').append('<li class="collection-item">' + r["args"]["witness"] + '</li>')
+                            //})
 
-                          // 2) Event list
-                          var allEvents = love.allEvents()
-                          allEvents.watch(function (e, r) {
-                            if (e) throw e
-                            $('#events').append('<li class="collection-item">' + r.event + '</li>')
-                            console.log(r)
-                            Materialize.toast(r.event + ", you may need to reload the DAPP", 3000)
+                            // 2) Event list
+                            var allEvents = love.allEvents()
+                            allEvents.watch(function (e, r) {
+                              if (e) throw e
+                              $('#events').append('<li class="collection-item">' + r.event + '</li>')
+                              console.log(r)
+                              Materialize.toast(r.event + ", you may need to reload the DAPP", 3000)
+                            })
+
+                            // Past events
+                            // 1) Witnesses
+                            //var witness_added_past = love.WitnessAdded()
+                            //witness_added_past.get(function (e, r) {
+                            //  if (e) throw e
+                            //  $('#witness_list').append('<li class="collection-item">' + r["args"]["witness"] + '</li>')
+                            //})
+
+                            // 2) Event list
+                            //var allEvents_past = love.allEvents()
+                            //allEvents_past.get(function (e, r) {
+                            //  if (e) throw e
+                            //  $('#events').append('<li class="collection-item">' + JSON.stringify(r) + '</li>')
+                            //})
                           })
-
-                          // Past events
-                          // 1) Witnesses
-                          //var witness_added_past = love.WitnessAdded()
-                          //witness_added_past.get(function (e, r) {
-                          //  if (e) throw e
-                          //  $('#witness_list').append('<li class="collection-item">' + r["args"]["witness"] + '</li>')
-                          //})
-
-                          // 2) Event list
-                          //var allEvents_past = love.allEvents()
-                          //allEvents_past.get(function (e, r) {
-                          //  if (e) throw e
-                          //  $('#events').append('<li class="collection-item">' + JSON.stringify(r) + '</li>')
-                          //})
                         })
                       })
                     })
